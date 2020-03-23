@@ -96,7 +96,7 @@ public class ClasseController implements IClasseController {
 	}
 
 	@Override
-	@GetMapping
+	@GetMapping(path = "/all")
 	public ResponseEntity<ResponseDto> findAll() {
 		List<ClasseDto> list = convert.listEntiteToDto(service.findAll());
 		

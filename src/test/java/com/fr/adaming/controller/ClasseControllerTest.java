@@ -24,6 +24,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fr.adaming.dto.ClasseDtoCreate;
 import com.fr.adaming.dto.ResponseDto;
 
+/**
+ * Tests de la classe ClasseController
+ * @author Flavien
+ * @since 1.0.x
+ *
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ClasseControllerTest {
@@ -36,8 +42,14 @@ public class ClasseControllerTest {
 	// **********************************************************************
 	// TEST CREATE
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode CreatingClasseWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("Test create OK")
+	@Sql(statements = "DELETE FROM Classe", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 	public void testCreatingClasseWithController_shouldWork() throws UnsupportedEncodingException, Exception {
 
 		// preparer le DTO
@@ -56,37 +68,25 @@ public class ClasseControllerTest {
 		// convertir la reponse JSON en DTO
 		ResponseDto responseDto = mapper.readValue(responseAsStrig, ResponseDto.class);
 
-		assertThat(responseDto).isNotNull().hasFieldOrPropertyWithValue("message", "SUCCESS");
-	}
+		String absString = mapper.writeValueAsString(responseDto.getObject());
+		ClasseDtoCreate classeResponsDto = mapper.readValue(absString, ClasseDtoCreate.class);
 
-	@Test
-	@DisplayName("Test create with no attribute")
-	public void testCreatingWithFail_SHouldReturn400() throws UnsupportedEncodingException, Exception {
-		// preparer le DTO
-		ClasseDtoCreate requestDto = new ClasseDtoCreate();
-
-		// convrtir le DTO en Json
-		String dtoAsJson = mapper.writeValueAsString(requestDto);
-
-		// test requete
-		String responseAsStrig = mockMvc
-				.perform(post("http://localhost:8080/classe/").contentType(MediaType.APPLICATION_JSON_VALUE)
-						.content(dtoAsJson))
-				.andDo(print()).andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
-		// convertir la reponse JSON en DTO
-		ResponseDto responseDto = mapper.readValue(responseAsStrig, ResponseDto.class);
-
-		assertThat(responseDto).isNotNull().hasFieldOrPropertyWithValue("message", "FAIL");
-
+		assertThat(classeResponsDto).isNotNull().hasFieldOrPropertyWithValue("nom", requestDto.getNom());
+		assertThat(responseDto).hasFieldOrPropertyWithValue("message", "SUCCESS");
 	}
 
 	// **********************************************************************
 	// TEST FIND BY
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode FindByIdWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("Find by Id Ok")
 	@Sql(statements = "INSERT INTO Classe (id,nom) VALUES (5,'sixiemeB')", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-	@Sql(statements = "DELETE FROM Classe",executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+	@Sql(statements = "DELETE FROM Classe", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 	public void testFindByIdWithController_shouldWork() throws UnsupportedEncodingException, Exception {
 		int id = 5;
 
@@ -100,6 +100,11 @@ public class ClasseControllerTest {
 		assertThat(responseDto).hasFieldOrPropertyWithValue("message", "SUCCESS");
 	}
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode FindByIdWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("Test find by Id == 0")
 	public void testFindByIdWithController_ReturnFAIL() throws UnsupportedEncodingException, Exception {
@@ -118,6 +123,11 @@ public class ClasseControllerTest {
 	// **********************************************************************
 	// TEST FIND ALL
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode FindAllWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("test Find All OK")
 	public void testFindAllWithController_shouldWork() throws UnsupportedEncodingException, Exception {
@@ -127,21 +137,25 @@ public class ClasseControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		// convertir la reponse JSON en DTO
 		ResponseDto responseDto = mapper.readValue(responseAsStrig, ResponseDto.class);
-
 		assertThat(responseDto).isNotNull().hasFieldOrPropertyWithValue("message", "SUCCESS");
 	}
 
 	// **********************************************************************
 	// TEST UPDATE
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode UpdateClasseWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("Test Update OK")
-	@Sql(statements = "INSERT INTO Classe (id,nom) VALUES (10,'sixiemeB')",executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
-	@Sql(statements = "DELETE FROM Classe",executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
+	@Sql(statements = "INSERT INTO Classe (id,nom) VALUES (5,'sixiemeB')", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+	@Sql(statements = "DELETE FROM Classe", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 	public void testUpdateClasseWithController_shouldWork() throws UnsupportedEncodingException, Exception {
 		ClasseDtoCreate requestDto = new ClasseDtoCreate();
-		requestDto.setId(10);
 		requestDto.setNom("6B");
+		requestDto.setId(5);
 
 		// convrtir le DTO en Json
 		String dtoAsJson = mapper.writeValueAsString(requestDto);
@@ -158,10 +172,18 @@ public class ClasseControllerTest {
 		
 	}
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode UpdateClasseWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
-	@DisplayName("Test Update FAIL")
+	@Sql(statements = "DELETE FROM Classe", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+	@DisplayName("Test UpdateFAIL")
 	public void testUpdateClasseWithController_ReturnFAIL() throws UnsupportedEncodingException, Exception {
 		ClasseDtoCreate requestDto = new ClasseDtoCreate();
+		requestDto.setNom("6B");
+		requestDto.setId(5);
 
 		// convrtir le DTO en Json
 		String dtoAsJson = mapper.writeValueAsString(requestDto);
@@ -170,7 +192,7 @@ public class ClasseControllerTest {
 		String responseAsStrig = mockMvc
 				.perform(put("http://localhost:8080/classe/").contentType(MediaType.APPLICATION_JSON_VALUE)
 						.content(dtoAsJson))
-				.andDo(print()).andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+				.andDo(print()).andExpect(status().is(400)).andReturn().getResponse().getContentAsString();
 		// convertir la reponse JSON en DTO
 		ResponseDto responseDto = mapper.readValue(responseAsStrig, ResponseDto.class);
 
@@ -179,6 +201,11 @@ public class ClasseControllerTest {
 
 	// **********************************************************************
 	// TEST DELETE
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode DeleteByIdWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Sql(statements = "INSERT INTO Classe (id,nom) VALUES (5,'sixiemeB')", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 	@Sql(statements = "DELETE FROM Classe", executionPhase = ExecutionPhase.AFTER_TEST_METHOD)
 	@Test
@@ -197,6 +224,11 @@ public class ClasseControllerTest {
 		assertThat(responseDto).hasFieldOrPropertyWithValue("message", "SUCCESS");
 	}
 
+	/**
+	 * Cette méthode vérifie le fonctionnement de la méthode DeleteByIdWithController
+	 * @throws UnsupportedEncodingException en cas d'erreur de conversion JSON - String
+	 * @throws Exception en cas d'erreur général
+	 */
 	@Test
 	@DisplayName("Test Delete by NOT OK")
 	public void testDeleteByIdWithController_ReturnFAIL() throws UnsupportedEncodingException, Exception {
@@ -212,5 +244,4 @@ public class ClasseControllerTest {
 
 		assertThat(responseDto).hasFieldOrPropertyWithValue("message", "FAIL");
 	}
-
 }
